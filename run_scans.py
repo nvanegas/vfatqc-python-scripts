@@ -280,9 +280,6 @@ if __name__ == '__main__':
                            )
       # timeout must be properly set, otherwise tasks will crash
       print res.get(999999999)
-      print("Normal termination")
-      pool.close()
-      pool.join()
     except KeyboardInterrupt:
       print("Caught KeyboardInterrupt, terminating workers")
       pool.terminate()
@@ -293,3 +290,8 @@ if __name__ == '__main__':
       e = sys.exc_info()[0]
       print("Caught non-Python Exception %s"%(e))
       pool.terminate()
+    else:
+      print("Normal termination")
+      pool.close()
+      pass
+    pool.join()
