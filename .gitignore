@@ -1,5 +1,6 @@
 # Ignore everything
-*
+/tmp
+*~
 
 # Don't ignore git settings
 !*.gitignore

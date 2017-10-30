@@ -19,6 +19,12 @@ parser.add_option("--dirPath", type="string", dest="dirPath", default=None,
                   help="Specify the path where the scan data should be stored", metavar="dirPath")
 parser.add_option("--vt1", type="int", dest="vt1",
                   help="VThreshold1 DAC value for all VFATs", metavar="vt1", default=100)
+parser.add_option("--latency", type="int", dest = "latency", default = 15, #introducing parameters for the ultraScurve.py script. Next 3 options (NV)
+                  help="Specify Latency to be passed to ultraScurve", metavar="latency")
+parser.add_option("--L1Atime", type="int", dest = "L1Atime", default = 400,
+                  help="Specify time between L1As in bx  to be passed to ultraScurve", metavar="L1Atime")
+parser.add_option("--pulseDelay", type="int", dest = "pDel", default = 20,
+                  help="Specify time of pulse before L1A in bx  to be passed to ultraScurve", metavar="pDel")
 
 (options, args) = parser.parse_args()
 
@@ -83,14 +89,21 @@ for vfat in range(0,24):
 zeroAllVFATChannels(ohboard,options.gtx,mask=0x0,debug=options.debug)
 
 # Scurve scan with trimdac set to 0
+
 filename0 = "%s/SCurveData_trimdac0_range0.root"%dirPath
+runCommand(["stat",filename0]) #checking NAS (NV)
+runCommand(["ls",filename0])
+
 cmd = [ "ultraScurve.py",
         "--shelf=%i"%(options.shelf),
         "-s%d"%(options.slot),
         "-g%d"%(options.gtx),
         "--filename=%s"%(filename0),
         "--vfatmask=0x%x"%(options.vfatmask),
-        "--nevts=%i"%(options.nevts)]
+        "--nevts=%i"%(options.nevts),#]
+        "--latency=%i"%(options.latency),   #using new options as strings to be passed to ultraScurve --> next 3 lines. (NV)
+        "--pulseDelay=%i"%(options.pDel),
+        "--L1Atime=%i"%(options.L1Atime)]
 if options.debug:
     cmd.append("--debug")
 runCommand(cmd)
@@ -132,13 +145,18 @@ if rangeFile == None:
         
         #Scurve scan with trimdac set to 31 (maximum trimming)
         filename31 = "%s/SCurveData_trimdac31_range%i.root"%(dirPath,trimRange)
+        runCommand(["stat",filename31]) #checking NAS (NV)
+        runCommand(["ls",filename31])
         cmd = [ "ultraScurve.py",
                 "--shelf=%i"%(options.shelf),
                 "-s%d"%(options.slot),
                 "-g%d"%(options.gtx),
                 "--filename=%s"%(filename31),
                 "--vfatmask=0x%x"%(options.vfatmask),
-                "--nevts=%i"%(options.nevts)]
+                "--nevts=%i"%(options.nevts),#]
+                "--latency=%i"%(options.latency),   #using new options as strings to be passed to ultraScurve --> next 3 lines. (NV)
+                "--pulseDelay=%i"%(options.pDel),
+                "--L1Atime=%i"%(options.L1Atime)]
         if options.debug:
             cmd.append("--debug")
         runCommand(cmd)
@@ -210,14 +228,22 @@ for i in range(0,5):
             trimDACs[vfat][ch] += pow(2,4-i)
             writeVFAT(ohboard,options.gtx,vfat,"VFATChannels.ChanReg%d"%(ch),trimDACs[vfat][ch],options.debug)
     # Run an SCurve
+
     filenameBS = "%s/SCurveData_binarySearch%i.root"%(dirPath,i)
+    runCommand(["stat",filenameBS]) #checking NAS (NV)
+    runCommand(["ls",filenameBS])
+
     cmd = [ "ultraScurve.py",
             "--shelf=%i"%(options.shelf),
             "-s%d"%(options.slot),
             "-g%d"%(options.gtx),
             "--filename=%s"%(filenameBS),
             "--vfatmask=0x%x"%(options.vfatmask),
-            "--nevts=%i"%(options.nevts)]
+            "--nevts=%i"%(options.nevts),#]
+            "--latency=%i"%(options.latency),   #using new options as strings to be passed to ultraScurve --> next 3 lines. (NV)
+            "--pulseDelay=%i"%(options.pDel),
+            "--L1Atime=%i"%(options.L1Atime)]    
+    
     if options.debug:
         cmd.append("--debug")
     runCommand(cmd)
@@ -235,18 +261,28 @@ for vfat in range(0,24):
         writeVFAT(ohboard,options.gtx,vfat,"VFATChannels.ChanReg%d"%(ch),trimDACs[vfat][ch],options.debug)
 
 filenameFinal = "%s/SCurveData_Trimmed.root"%dirPath
+runCommand(["stat",filenameFinal]) #checking NAS (NV)
+runCommand(["ls",filenameFinal])
+
 cmd = [ "ultraScurve.py",
         "--shelf=%i"%(options.shelf),
         "-s%d"%(options.slot),
         "-g%d"%(options.gtx),
         "--filename=%s"%(filenameFinal),
         "--vfatmask=0x%x"%(options.vfatmask),
-        "--nevts=%i"%(options.nevts)]
+        "--nevts=%i"%(options.nevts),#]
+        "--latency=%i"%(options.latency),   #using new options as strings to be passed to ultraScurve --> next 3 lines. (NV)
+        "--pulseDelay=%i"%(options.pDel),
+        "--L1Atime=%i"%(options.L1Atime)]    
+
 if options.debug:
     cmd.append("--debug")
 runCommand(cmd)
 
 scanFilename = '%s/scanInfo.txt'%dirPath
+runCommand(["stat",scanFilename]) #checking NAS (NV)
+runCommand(["ls",scanFilename])
+
 outF = open(scanFilename,'w')
 outF.write('vfat/I:tRange/I:sup/D:inf/D:trimVcal/D:trimCH/D\n')
 for vfat in range(0,24):
